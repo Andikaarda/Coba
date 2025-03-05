@@ -62,7 +62,7 @@
     </div>
 
     <h1>Photo</h1>
-    <video id="video" autoplay></video>
+    <video id="video" autoplay playsinline></video>
     <br>
     <button onclick="takePhoto()">Ambil Foto</button>
     <button onclick="resetPhotos()">Reset Foto</button>
@@ -85,16 +85,18 @@
         ];
         let photoCount = 0;
 
-        // Akses webcam
-        navigator.mediaDevices.getUserMedia({ video: { width: 400, height: 400 } })
-            .then(stream => {
-                video.srcObject = stream;
-            })
-            .catch(err => {
-                console.error("Gagal mengakses webcam", err);
-            });
+        // Akses kamera belakang
+        navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: { exact: "environment" }, width: 400, height: 400 } 
+        })
+        .then(stream => {
+            video.srcObject = stream;
+        })
+        .catch(err => {
+            console.error("Gagal mengakses webcam", err);
+        });
 
-        // Fungsi mengambil foto & menerapkan efek vintage
+        // Fungsi mengambil foto dengan efek vintage + inverted
         function takePhoto() {
             if (photoCount < 4) {
                 let canvas = canvases[photoCount];
@@ -102,9 +104,11 @@
                 canvas.width = 300;
                 canvas.height = 300;
 
-                // Ambil gambar dari video
+                // Membalik gambar (mirror horizontal)
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
+                
                 // Ambil data gambar
                 let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
                 let data = imageData.data;
